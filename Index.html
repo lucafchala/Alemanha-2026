@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda de Viagem — Alemanha Julho 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --accent: #1a3a52;
+    --gold: #c9a84c;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f3ef; padding: 1.5rem 0.75rem 3rem; color: #222; }
+
+  .trip-header {
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 1rem; margin-bottom: 1.2rem;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .trip-header h1 { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+  .trip-header p  { font-size: 13px; color: #666; margin-top: 2px; }
+  .flag { font-size: 30px; line-height: 1; }
+
+  .city-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+  .city-badge  { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 0.5px solid transparent; }
+
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.4rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #555; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  .days-grid { display: flex; flex-direction: column; gap: 1.1rem; max-width: 900px; margin: 0 auto; }
+
+  .day-card { border: 0.5px solid #d8d4cc; border-radius: var(--radius); overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+  .day-header { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+  .day-num    { font-size: 22px; font-weight: 600; min-width: 28px; line-height: 1; }
+  .day-info   { flex: 1; }
+  .day-date   { font-size: 11px; }
+  .day-weekday { font-size: 14px; font-weight: 600; color: #fff; }
+  .day-city   { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+
+  .transit-bar {
+    padding: 7px 14px; font-size: 11px; color: #555;
+    display: flex; align-items: center;
+    background: #f7f6f2; border-bottom: 0.5px solid #e0ddd6;
+    flex-wrap: wrap; gap: 0;
+  }
+  .transit-origin { font-weight: 600; color: #222; }
+  .transit-arrow  { margin: 0 6px; color: #aaa; }
+  .transit-dest   { font-weight: 600; color: #222; }
+  .transit-pills  { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; align-items: center; }
+  .transit-pill {
+    display: flex; align-items: center; gap: 4px; font-size: 10.5px;
+    padding: 2px 8px; border-radius: 12px; white-space: nowrap; font-weight: 500;
+  }
+  .transit-pill i { font-size: 12px; }
+  .transit-pill.dist { color:#1a5a8a; border: 0.5px solid #a0c8e8; background:#e8f3fb; }
+  .transit-pill.time { color:#7a4a00; border: 0.5px solid #e0c080; background:#fff8e8; }
+
+  .hotel-bar {
+    padding: 7px 14px; font-size: 11px;
+    display: flex; align-items: flex-start; gap: 8px;
+    border-bottom: 0.5px solid #e0ddd6; flex-wrap: wrap;
+  }
+  .hotel-bar > .ti { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+  .hotel-info { flex: 1; min-width: 0; }
+  .hotel-name { font-weight: 600; font-size: 11.5px; display: block; }
+  .hotel-addr { font-size: 10.5px; color: #777; margin-top: 2px; display: flex; align-items: center; gap: 3px; }
+  .hotel-addr .ti { font-size: 11px; }
+  .hotel-sep  { color: #bbb; font-size: 16px; align-self: center; margin: 0 6px; }
+  .hotel-tag  {
+    flex-shrink: 0; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px; white-space: nowrap; border: 0.5px solid;
+    align-self: center; margin-left: auto;
+  }
+  .tag-checkin  { background:#e6f5ec; color:#0f5c30; border-color:#8fcfaa; }
+  .tag-checkout { background:#fdecea; color:#8a1a1a; border-color:#f0a0a0; }
+  .tag-stay     { background:#f5f5f5; color:#555;    border-color:#ccc; }
+  .tag-both     { background:#fff8e0; color:#7a4a00; border-color:#e0c070; }
+
+  .slots { display: grid; grid-template-columns: repeat(6, 1fr); }
+  .slot { border-right: 0.5px solid #e8e5de; padding: 10px 10px 12px; min-height: 72px; }
+  .slot:last-child { border-right: none; }
+  .slot-label { font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 4px; }
+  .slot-label .ti { font-size: 13px; }
+  .slot-content { font-size: 12px; color: #666; line-height: 1.5; }
+
+  .slot.am { background: #eaf3fb; }
+  .slot.al { background: #fff8ed; }
+  .slot.ta { background: #edf7f1; }
+  .slot.ja { background: #fdf3e7; }
+  .slot.no { background: #f0ecfa; }
+  .label-am { color: #1976a8; }
+  .label-al { color: #b07a00; }
+  .label-ta { color: #1a7a4a; }
+  .label-ja { color: #c05e00; }
+  .label-no { color: #6633aa; }
+  .slot.wi { background: #fdf0f5; }
+  .label-wi { color: #8a1a4a; }
+
+  .event-name   { font-weight: 600; color: #222; font-size: 12px; }
+  .event-detail { font-size: 11px; color: #777; }
+  .event-time   { font-size: 11px; color: #b05000; font-weight: 600; }
+  .dress-badge  {
+    display: inline-flex; align-items: center; gap: 3px; margin-top: 4px;
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+    background: #f5ede0; color: #8a5200; border: 0.5px solid #e0c080;
+  }
+  .dress-badge .ti { font-size: 11px; }
+  .rating-badge {
+    display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 10px; background: #fffbe6; color: #b07700; border: 0.5px solid #f0d060;
+  }
+
+  @media (max-width: 640px) {
+    .slots { grid-template-columns: 1fr; }
+    .slot  { border-right: none; border-bottom: 0.5px solid #e8e5de; }
+    .slot:last-child { border-bottom: none; }
+    .transit-pills { margin-left: 0; margin-top: 4px; }
+    .hotel-tag { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="trip-header">
+  <div class="flag">🇩🇪</div>
+  <div>
+    <h1>Agenda de Viagem — Alemanha</h1>
+    <p>5 a 20 de julho de 2026 &nbsp;·&nbsp; 16 dias &nbsp;·&nbsp; 5 cidades &nbsp;·&nbsp; 5 hotéis</p>
+  </div>
+</div>
+
+<div class="city-legend">
+  <span class="city-badge" style="background:#e8f1f8;color:#1a3a52;border-color:#a8c4d8">✈ Frankfurt &nbsp;05–06/jul</span>
+  <span class="city-badge" style="background:#e6f5ec;color:#0f5c30;border-color:#8fcfaa">Dresden &nbsp;06–10/jul</span>
+  <span class="city-badge" style="background:#fff3e0;color:#7a4500;border-color:#f5c070">Wolfsburg &nbsp;10–13/jul</span>
+  <span class="city-badge" style="background:#f3ebfa;color:#5b2a8a;border-color:#c8a0e8">Lüneburg &nbsp;13–15/jul</span>
+  <span class="city-badge" style="background:#fdecea;color:#8a1a1a;border-color:#f0a0a0">Hamburgo &nbsp;15–20/jul</span>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:#b3d9f0"></div>Manhã</div>
+  <div class="legend-item"><div class="dot" style="background:#ffe5a0"></div>Almoço</div>
+  <div class="legend-item"><div class="dot" style="background:#b3e6cc"></div>Tarde</div>
+  <div class="legend-item"><div class="dot" style="background:#ffd5a0"></div>Jantar</div>
+  <div class="legend-item"><div class="dot" style="background:#d5c5f0"></div>Noite</div>
+  <div class="legend-item"><div class="dot" style="background:#c8e8b8"></div>Check-in</div>
+  <div class="legend-item"><div class="dot" style="background:#f5b8b8"></div>Check-out</div>
+  <div class="legend-item"><div class="dot" style="background:#f5c0d8"></div>Loja de Vinho</div>
+</div>
+
+<div class="days-grid" id="days"></div>
+
+<script>
+const cities = {
+  frankfurt: { label:"Frankfurt",  hdrBg:"#1a3a52", numColor:"#7fb8e0", badgeBg:"#4a7fa0", badgeTxt:"#fff" },
+  dresden:   { label:"Dresden",    hdrBg:"#0f4a28", numColor:"#6fcf97", badgeBg:"#2e7d52", badgeTxt:"#fff" },
+  wolfsburg: { label:"Wolfsburg",  hdrBg:"#7a4500", numColor:"#f5c070", badgeBg:"#c07020", badgeTxt:"#fff" },
+  luneburg:  { label:"Lüneburg",   hdrBg:"#4a2070", numColor:"#d0a0f0", badgeBg:"#8050b8", badgeTxt:"#fff" },
+  hamburg:   { label:"Hamburgo",   hdrBg:"#6a1010", numColor:"#f0a0a0", badgeBg:"#b03030", badgeTxt:"#fff" },
+};
+const hotelColor = {
+  frankfurt: { bg:"#e8f1f8", txt:"#1a3a52", icon:"#4a7fa0" },
+  dresden:   { bg:"#e6f5ec", txt:"#0f5c30", icon:"#2e7d52" },
+  wolfsburg: { bg:"#fff3e0", txt:"#7a4500", icon:"#c07020" },
+  luneburg:  { bg:"#f3ebfa", txt:"#5b2a8a", icon:"#8050b8" },
+  hamburg:   { bg:"#fdecea", txt:"#8a1a1a", icon:"#b03030" },
+};
+const hotelData = {
+  frankfurt: { name:"Hilton Garden Inn Frankfurt Airport", addr:"The Squaire 15, 60549 Frankfurt am Main" },
+  dresden:   { name:"Townhouse Hotel Dresden",             addr:"Neumarkt 1, 01067 Dresden" },
+  wolfsburg: { name:"The Ritz-Carlton Wolfsburg",          addr:"Parkstraße 1, 38440 Wolfsburg" },
+  luneburg:  { name:"Anno 1433 Hotel",                     addr:"Neue Sülze 24, 21335 Lüneburg" },
+  hamburg:   { name:"Renaissance Hamburg Hotel",           addr:"Große Bleichen, 20354 Hamburg" },
+};
+
+const slotContent = {
+  "05-no": `<div>
+    <div class="event-name"><i class="ti ti-plane-departure" style="font-size:12px;margin-right:3px"></i>LATAM LA 8070 — São Paulo → Frankfurt</div>
+    <div class="event-detail">GRU Guarulhos → Frankfurt Intl. · Economy Full · Lugares 14L, 14J, 14K</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">04/jul 23h45 → 05/jul 16h25</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>~11h40</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070"><i class="ti ti-users" style="font-size:11px"></i>Luciano · Carla · Luca</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#f5f5f5;color:#555;border:0.5px solid #ccc">Reserva: YSXXZF</span>
+    </div>
+  </div>`,
+  "20-no": `<div>
+    <div class="event-name"><i class="ti ti-plane-departure" style="font-size:12px;margin-right:3px"></i>LATAM LA 8071 — Frankfurt → São Paulo</div>
+    <div class="event-detail">Frankfurt Intl. → GRU Guarulhos · Economy Full · Lugares 15C, 15A, 15B</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">20/jul 21h30 → 21/jul 04h35</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>~12h05</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070"><i class="ti ti-users" style="font-size:11px"></i>Luciano · Carla · Luca</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#f5f5f5;color:#555;border:0.5px solid #ccc">Reserva: YSXXZF</span>
+    </div>
+  </div>`,
+  "06-ja": `<div>
+    <div class="event-name"><i class="ti ti-tools-kitchen-2" style="font-size:12px;margin-right:3px"></i>Steak Royal</div>
+    <div class="event-detail">Weiße Gasse 4 · Steakhouse</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">20h00</span>
+      <span class="rating-badge"><i class="ti ti-star-filled" style="font-size:10px"></i>4.7</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1a5a1a;color:#fff;border:0.5px solid #0f4a0f"><i class="ti ti-circle-check" style="font-size:11px"></i>Reservado</span>
+    </div>
+    <div><span class="dress-badge"><i class="ti ti-shirt"></i>Smart Casual</span></div>
+  </div>`,
+  "10-ja": `<div>
+    <div class="event-name"><i class="ti ti-tools-kitchen-2" style="font-size:12px;margin-right:3px"></i>BEEF CLUB Wolfsburg</div>
+    <div class="event-detail">Stadtbrücke, 38440 Wolfsburg · Autostadt · Fire & Salt Grill</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">Wagyu Ribeye · Grelha a carvão · Vinho com sommelier</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">20h15</span>
+      <span class="rating-badge"><i class="ti ti-star-filled" style="font-size:10px"></i>4.6</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1a5a1a;color:#fff;border:0.5px solid #0f4a0f"><i class="ti ti-circle-check" style="font-size:11px"></i>Reservado</span>
+    </div>
+    <div><span class="dress-badge"><i class="ti ti-shirt"></i>Smart Casual / Business Casual</span></div>
+  </div>`,
+  "06-am": `<div>
+    <div class="event-name"><i class="ti ti-train" style="font-size:12px;margin-right:3px"></i>ICE 1557 — Frankfurt → Dresden</div>
+    <div class="event-detail">Frankfurt(Main) Hbf → Dresden Hbf · Vagão 27, Lugares 11, 13, 15</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">09h19 → 13h47</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>~4h28</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#e6f5ec;color:#0f5c30;border:0.5px solid #8fcfaa"><i class="ti ti-armchair" style="font-size:11px"></i>1ª Classe</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070"><i class="ti ti-users" style="font-size:11px"></i>3 passageiros</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#f5f5f5;color:#555;border:0.5px solid #ccc">Super Sparpreis · €272,67</span>
+    </div>
+    <div style="margin-top:4px;font-size:10px;color:#999">Res. Nº 809100121800 · Ticketcode: QM31RLJB · ⚠️ Não reembolsável</div>
+  </div>`,
+  "07-am": `<div>
+    <div class="event-name"><i class="ti ti-building-arch" style="font-size:12px;margin-right:3px"></i>Cidade Velha de Dresden</div>
+    <div class="event-detail">Altstadt · Passeio a pé</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">11h00 – 13h30</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>2h30</span>
+    </div>
+  </div>`,
+  "07-al": `<div>
+    <div class="event-name" style="display:flex;align-items:center;gap:4px">
+      <i class="ti ti-cheese" style="font-size:12px"></i>
+      <span>Lust und Laune</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070;margin-left:2px">Sugestão</span>
+    </div>
+    <div class="event-detail">Bautzner Landstraße 8 · Weißer Hirsch · Käse, Delikatessen & Wein</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">Queijos franceses de leite cru · Embutidos · Vinhos França, Alemanha & Áustria</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">13h30 – 15h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e6f5ec;color:#0f5c30;border:0.5px solid #8fcfaa"><i class="ti ti-clock" style="font-size:10px"></i>Seg–Sex 09h–18h30</span>
+    </div>
+  </div>`,
+  "09-ja": `<div>
+    <div class="event-name" style="display:flex;align-items:center;gap:4px">
+      <i class="ti ti-tools-kitchen-2" style="font-size:12px"></i>
+      <span>GIOIA Delicatessen</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070;margin-left:2px">Sugestão</span>
+    </div>
+    <div class="event-detail">Dresden Neustadt · Delicatessen Italiano</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">Queijos Pasta-Filata frescos · Pequenos produtores artesanais · Última noite em Dresden</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">19h00</span>
+    </div>
+  </div>`,
+  "08-am": `<div>
+    <div class="event-name"><i class="ti ti-mountain" style="font-size:12px;margin-right:3px"></i>Suíça Boêmia e Saxônia</div>
+    <div class="event-detail">Parque Nacional · Excursão</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">08h00 – 18h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>10h</span>
+    </div>
+  </div>`,
+  "08-ta": `<div>
+    <div class="event-name"><i class="ti ti-mountain" style="font-size:12px;margin-right:3px"></i>Suíça Boêmia e Saxônia</div>
+    <div class="event-detail">Continuação da excursão</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">até 18h00</span>
+    </div>
+  </div>`,
+  "16-ta": `<div>
+    <div class="event-name" style="display:flex;align-items:center;gap:4px">
+      <i class="ti ti-building-store" style="font-size:12px"></i>
+      <span>Alsterhaus — Food Boulevard</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070;margin-left:2px">Sugestão</span>
+    </div>
+    <div class="event-detail">Jungfernstieg 16–20 · Delicatessen & Vinhos Raros</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">Oschätzchen · Raritäten-Lounge · Queijaria Fromage · Açougue Beisser</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">10h00 – 20h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-walk" style="font-size:10px"></i>5 min do hotel</span>
+    </div>
+  </div>`,
+  "17-ta": `<div>
+    <div class="event-name" style="display:flex;align-items:center;gap:4px">
+      <i class="ti ti-cheese" style="font-size:12px"></i>
+      <span>KÄSE, WEIN & mehr — Eppendorf</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070;margin-left:2px">Sugestão</span>
+    </div>
+    <div class="event-detail">Erikastraße 58 · Delicatessen desde 1930 · Bairro Eppendorf</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">250 queijos · Vinhos · Azeites · Especialidades italianas · Panini na hora</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">09h00 – 19h00</span>
+    </div>
+  </div>`,
+  "18-ja": `<div>
+    <div class="event-name"><i class="ti ti-tools-kitchen-2" style="font-size:12px;margin-right:3px"></i>Deichgraf</div>
+    <div class="event-detail">Deichstraße 23 · Culinária Hanseática Tradicional</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">Pannfisch · Labskaus · Maatjes · Vinho branco alemão & Sancerre</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">19h30</span>
+      <span class="rating-badge"><i class="ti ti-star-filled" style="font-size:10px"></i>4.5</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span class="dress-badge"><i class="ti ti-shirt"></i>Smart Casual</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fdecea;color:#8a1a1a;border:0.5px solid #f0a0a0"><i class="ti ti-clock" style="font-size:11px"></i>Reserva recomendada</span>
+    </div>
+  </div>`,
+  "19-wi": `<div>
+    <div class="event-name"><i class="ti ti-bottle" style="font-size:12px;margin-right:3px"></i>Carl Tesdorpf Weinhandel</div>
+    <div class="event-detail">Friesenweg 24, 22763 Hamburg · Bahrenfeld</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">1ª casa de vinhos da Alemanha · Bordeaux · Champagne · Raridades · Bio</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#fdf0f5;color:#8a1a4a;border:0.5px solid #e8a0c0"><i class="ti ti-clock" style="font-size:10px"></i>Seg–Sex: 09h–18h</span>
+    </div>
+  </div>`,
+  "20-am": `<div>
+    <div class="event-name"><i class="ti ti-train" style="font-size:12px;margin-right:3px"></i>ICE 519 — Hamburg → Frankfurt</div>
+    <div class="event-detail">Hamburg Hbf · Gleis 14 · Vagão 12, Lugares 101–103</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">09h45 → 14h49</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>~5h04</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#e6f5ec;color:#0f5c30;border:0.5px solid #8fcfaa"><i class="ti ti-armchair" style="font-size:11px"></i>1ª Classe</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fff8e0;color:#7a4a00;border:0.5px solid #e0c070"><i class="ti ti-users" style="font-size:11px"></i>3 passageiros</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#f5f5f5;color:#555;border:0.5px solid #ccc"><i class="ti ti-device-mobile" style="font-size:11px"></i>Sparpreis · €263,67</span>
+    </div>
+    <div style="margin-top:4px;font-size:10px;color:#999">Res. Nº 804310261615 · Ticketcode: 624D1H4Y</div>
+  </div>`,
+  "10-am": `<div>
+    <div class="event-name"><i class="ti ti-car" style="font-size:12px;margin-right:3px"></i>Sixt Rent a Car — Retirada</div>
+    <div class="event-detail">Dresden Hauptbahnhof (Estação Central)</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">10h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e6f5ec;color:#0f5c30;border:0.5px solid #8fcfaa"><i class="ti ti-key" style="font-size:10px"></i>Check-out carro</span>
+    </div>
+  </div>`,
+  "15-am": `<div>
+    <div class="event-name"><i class="ti ti-car" style="font-size:12px;margin-right:3px"></i>Sixt Rent a Car — Devolução</div>
+    <div class="event-detail">Hamburg Hauptbahnhof (Estação Central)</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">10h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#fdecea;color:#8a1a1a;border:0.5px solid #f0a0a0"><i class="ti ti-key" style="font-size:10px"></i>Devolução carro</span>
+    </div>
+  </div>`,
+  "11-al": `<div>
+    <div class="event-name"><i class="ti ti-tools-kitchen-2" style="font-size:12px;margin-right:3px"></i>EAT Grill & Bar</div>
+    <div class="event-detail">Wolfsburg · Grill & Bar</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">13h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1a5a1a;color:#fff;border:0.5px solid #0f4a0f"><i class="ti ti-circle-check" style="font-size:11px"></i>Reservado</span>
+    </div>
+  </div>`,
+  "11-ta": `<div>
+    <div class="event-name"><i class="ti ti-building-factory" style="font-size:12px;margin-right:3px"></i>Autostadt GmbH</div>
+    <div class="event-detail">Stadtbrücke, 38440 Wolfsburg · Museu & Parque Volkswagen</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">16h00 – 17h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-clock" style="font-size:10px"></i>1h</span>
+    </div>
+  </div>`,
+  "11-no": `<div>
+    <div class="event-name"><i class="ti ti-music" style="font-size:12px;margin-right:3px"></i>Bausa — Autostadt Sommerfestival</div>
+    <div class="event-detail">Lagunenbühne · Autostadt Wolfsburg</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+      <span class="event-time">20h00</span>
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:#f3ebfa;color:#5b2a8a;border:0.5px solid #c8a0e8"><i class="ti ti-ticket" style="font-size:10px"></i>Eventim</span>
+    </div>
+    <div style="margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#e8f3fb;color:#1a5a8a;border:0.5px solid #a0c8e8"><i class="ti ti-device-mobile" style="font-size:11px"></i>Ingresso Digital</span>
+    </div>
+  </div>`,
+};
+
+const days = [
+  { n:"05", w:"Domingo",  d:"5 jul",  city:"frankfurt", transit:null,           hotel:{ tagLabel:"Check-in",  tagCls:"tag-checkin"  } },
+  { n:"06", w:"Segunda",  d:"6 jul",  city:"dresden",   transit:{ from:"Frankfurt", to:"Dresden",   km:"467 km", time:"~4h30" }, hotel:{ tagLabel:"C/O · C/I", tagCls:"tag-both"    }, hotelTransit:{ from:"frankfurt", to:"dresden"   } },
+  { n:"07", w:"Terça",    d:"7 jul",  city:"dresden",   transit:null,           hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"08", w:"Quarta",   d:"8 jul",  city:"dresden",   transit:null,           hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"09", w:"Quinta",   d:"9 jul",  city:"dresden",   transit:null,           hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"10", w:"Sexta",    d:"10 jul", city:"wolfsburg",  transit:{ from:"Dresden",   to:"Wolfsburg",  km:"312 km", time:"~2h35" }, hotel:{ tagLabel:"C/O · C/I", tagCls:"tag-both"    }, hotelTransit:{ from:"dresden",   to:"wolfsburg"  } },
+  { n:"11", w:"Sábado",   d:"11 jul", city:"wolfsburg",  transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"12", w:"Domingo",  d:"12 jul", city:"wolfsburg",  transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"13", w:"Segunda",  d:"13 jul", city:"luneburg",   transit:{ from:"Wolfsburg", to:"Lüneburg",   km:"116 km", time:"~1h05" }, hotel:{ tagLabel:"C/O · C/I", tagCls:"tag-both"    }, hotelTransit:{ from:"wolfsburg", to:"luneburg"   } },
+  { n:"14", w:"Terça",    d:"14 jul", city:"luneburg",   transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"15", w:"Quarta",   d:"15 jul", city:"hamburg",    transit:{ from:"Lüneburg",  to:"Hamburgo",   km:"53 km",  time:"~42min"}, hotel:{ tagLabel:"C/O · C/I", tagCls:"tag-both"    }, hotelTransit:{ from:"luneburg",  to:"hamburg"    } },
+  { n:"16", w:"Quinta",   d:"16 jul", city:"hamburg",    transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"17", w:"Sexta",    d:"17 jul", city:"hamburg",    transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"18", w:"Sábado",   d:"18 jul", city:"hamburg",    transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"19", w:"Domingo",  d:"19 jul", city:"hamburg",    transit:null,          hotel:{ tagLabel:"Hospedado", tagCls:"tag-stay"    } },
+  { n:"20", w:"Segunda",  d:"20 jul", city:"hamburg",    transit:null,          hotel:{ tagLabel:"Check-out", tagCls:"tag-checkout" } },
+];
+
+const slots = [
+  { cls:"am", lCls:"label-am", icon:"ti-sun",             label:"Manhã",  key:"am" },
+  { cls:"al", lCls:"label-al", icon:"ti-bowl-chopsticks", label:"Almoço", key:"al" },
+  { cls:"ta", lCls:"label-ta", icon:"ti-map-pin",          label:"Tarde",  key:"ta" },
+  { cls:"ja", lCls:"label-ja", icon:"ti-wine",             label:"Jantar", key:"ja" },
+  { cls:"no", lCls:"label-no", icon:"ti-moon",             label:"Noite",  key:"no" },
+  { cls:"wi", lCls:"label-wi", icon:"ti-bottle",            label:"Loja de Vinho", key:"wi" },
+];
+
+const container = document.getElementById("days");
+days.forEach(day => {
+  const c  = cities[day.city];
+  const hc = hotelColor[day.city];
+  const hd = hotelData[day.city];
+  const card = document.createElement("div");
+  card.className = "day-card";
+
+  // Header
+  const hdr = document.createElement("div");
+  hdr.className = "day-header";
+  hdr.style.background = c.hdrBg;
+  hdr.innerHTML = `
+    <div class="day-num" style="color:${c.numColor}">${day.n}</div>
+    <div class="day-info">
+      <div class="day-weekday">${day.w}</div>
+      <div class="day-date" style="color:${c.numColor}88">${day.d}</div>
+    </div>
+    <div class="day-city" style="background:${c.badgeBg};color:${c.badgeTxt}">${c.label}</div>`;
+  card.appendChild(hdr);
+
+  // Transit
+  if (day.transit) {
+    const t = day.transit;
+    const bar = document.createElement("div");
+    bar.className = "transit-bar";
+    bar.innerHTML = `
+      <i class="ti ti-car" style="font-size:14px;margin-right:6px"></i>
+      <span class="transit-origin">${t.from}</span>
+      <span class="transit-arrow">→</span>
+      <span class="transit-dest">${t.to}</span>
+      <div class="transit-pills">
+        <span class="transit-pill dist"><i class="ti ti-road"></i>${t.km}</span>
+        <span class="transit-pill time"><i class="ti ti-clock"></i>${t.time}</span>
+      </div>`;
+    card.appendChild(bar);
+  }
+
+  // Hotel bar
+  if (day.hotel) {
+    const hb = document.createElement("div");
+    hb.className = "hotel-bar";
+    hb.style.background = hc.bg + "66";
+    hb.style.borderBottom = `0.5px solid ${hc.icon}44`;
+
+    if (day.hotelTransit) {
+      const hFrom = hotelData[day.hotelTransit.from];
+      const hTo   = hotelData[day.hotelTransit.to];
+      const cFrom = hotelColor[day.hotelTransit.from];
+      const cTo   = hotelColor[day.hotelTransit.to];
+      hb.innerHTML = `
+        <i class="ti ti-building" style="color:${cFrom.icon}"></i>
+        <div class="hotel-info">
+          <span class="hotel-name" style="color:${cFrom.txt}">${hFrom.name}</span>
+          <span class="hotel-addr"><i class="ti ti-map-pin"></i>${hFrom.addr}</span>
+        </div>
+        <span class="hotel-sep">→</span>
+        <i class="ti ti-building" style="color:${cTo.icon}"></i>
+        <div class="hotel-info">
+          <span class="hotel-name" style="color:${cTo.txt}">${hTo.name}</span>
+          <span class="hotel-addr"><i class="ti ti-map-pin"></i>${hTo.addr}</span>
+        </div>
+        <span class="hotel-tag ${day.hotel.tagCls}">${day.hotel.tagLabel}</span>`;
+    } else {
+      hb.innerHTML = `
+        <i class="ti ti-building" style="color:${hc.icon}"></i>
+        <div class="hotel-info">
+          <span class="hotel-name" style="color:${hc.txt}">${hd.name}</span>
+          <span class="hotel-addr"><i class="ti ti-map-pin"></i>${hd.addr}</span>
+        </div>
+        <span class="hotel-tag ${day.hotel.tagCls}">${day.hotel.tagLabel}</span>`;
+    }
+    card.appendChild(hb);
+  }
+
+  // Slots
+  const grid = document.createElement("div");
+  grid.className = "slots";
+  slots.forEach(s => {
+    const sl = document.createElement("div");
+    sl.className = `slot ${s.cls}`;
+    sl.innerHTML = `
+      <div class="slot-label ${s.lCls}"><i class="ti ${s.icon}"></i>${s.label}</div>
+      <div class="slot-content">${slotContent[`${day.n}-${s.key}`] || ""}</div>`;
+    grid.appendChild(sl);
+  });
+  card.appendChild(grid);
+  container.appendChild(card);
+});
+</script>
+</body>
+</html>
